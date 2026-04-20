@@ -20,7 +20,7 @@
 
         <ul id="app-list"></ul>
 
-        <p id="empty-msg" class="empty-msg hidden">No applications yet. Add one above!</p>
+        <p id="empty-msg" class="empty-msg" style="display:none;">No applications yet. Add one above!</p>
         <p id="error-msg" class="error-msg hidden"></p>
     </div>
 
@@ -57,7 +57,7 @@
 
         function renderApps(apps) {
             appList.innerHTML = "";
-            emptyMsg.classList.toggle("hidden", apps.length > 0);
+            emptyMsg.style.display = apps.length > 0 ? "none" : "block";
 
             apps.forEach(app => {
                 const li = document.createElement("li");
