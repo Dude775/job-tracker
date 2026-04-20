@@ -1,10 +1,11 @@
 from flask import jsonify, request, Blueprint
-from db import get_collection
+from werkzeug.exceptions import NotFound, BadRequest
 from bson import ObjectId
+from db import get_collection
 
 applications_bp = Blueprint("applications", __name__)
 
-# get all
+# כל המשרות
 @applications_bp.route('/applications', methods=['GET'])
 def get_applications():
     col = get_collection("applications")
@@ -13,57 +14,75 @@ def get_applications():
         a["_id"] = str(a["_id"])
     return jsonify(apps)
 
-# add new
-@applications_bp.route('/applications', methods=['POST'])
-def create_application():
-    col = get_collection("applications")
-    data = request.get_json()
-    if not data or "company" not in data or "position" not in data:
-        return jsonify({"error": "missing company or position"}), 400
-    new_app = {
-        "company": data["company"].strip(),
-        "position": data["position"].strip(),
-        "status": "applied",
-        "events": []
-    }
-    col.insert_one(new_app)
-    new_app["_id"] = str(new_app["_id"])
-    return jsonify(new_app), 201
-
-# get one by id
+# משרה בודדת
 @applications_bp.route('/applications/<id>', methods=['GET'])
 def get_application(id):
     col = get_collection("applications")
     try:
         app = col.find_one({"_id": ObjectId(id)})
     except:
-        return jsonify({"error": "invalid id format"}), 400
+        raise BadRequest("invalid id format")
     if not app:
-        return jsonify({"error": "application not found"}), 404
+        raise NotFound(f"application {id} not found")
     app["_id"] = str(app["_id"])
     return jsonify(app)
 
-# update
+# יצירת משרה חדשה
+@applications_bp.route('/applications', methods=['POST'])
+def create_application():
+    col = get_collection("applications")
+    if not request.is_json:
+        raise BadRequest("request body must be JSON")
+    data = request.get_json()
+    if "company" not in data or "position" not in data:
+        raise BadRequest("missing company or position")
+    if not data["company"].strip() or not data["position"].strip():
+        raise BadRequest("company and position cant be empty")
+    new_app = {
+        "company": data["company"].strip(),
+        "position": data["position"].strip(),
+        "status": "applied",
+        "source": data.get("source", ""),
+        "notes": data.get("notes", ""),
+        "events": []
+    }
+    col.insert_one(new_app)
+    new_app["_id"] = str(new_app["_id"])
+    return jsonify(new_app), 201
+
+# עדכון משרה
 @applications_bp.route('/applications/<id>', methods=['PUT'])
 def update_application(id):
     col = get_collection("applications")
     try:
         app = col.find_one({"_id": ObjectId(id)})
     except:
-        return jsonify({"error": "invalid id"}), 400
+        raise BadRequest("invalid id")
     if not app:
-        return jsonify({"error": "not found"}), 404
+        raise NotFound("application not found")
     data = request.get_json()
     if not data:
-        return jsonify({"error": "no data"}), 400
+        raise BadRequest("no data provided")
     allowed = ["company", "position", "status", "source", "notes"]
     update_fields = {}
     for field in allowed:
         if field in data:
             update_fields[field] = data[field]
     if not update_fields:
-        return jsonify({"error": "no valid fields"}), 400
+        raise BadRequest("no valid fields to update")
     col.update_one({"_id": ObjectId(id)}, {"$set": update_fields})
     updated = col.find_one({"_id": ObjectId(id)})
     updated["_id"] = str(updated["_id"])
     return jsonify(updated)
+
+# מחיקת משרה
+@applications_bp.route('/applications/<id>', methods=['DELETE'])
+def delete_application(id):
+    col = get_collection("applications")
+    try:
+        result = col.delete_one({"_id": ObjectId(id)})
+    except:
+        raise BadRequest("invalid id")
+    if result.deleted_count == 0:
+        raise NotFound("not found")
+    return jsonify({"message": "deleted successfuly"}), 200
