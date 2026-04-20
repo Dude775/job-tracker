@@ -1,0 +1,169 @@
+{
+  "info": {
+    "_postman_id": "c3d5ee75-5ded-4473-b915-ea34f1817bd4",
+    "name": "job-tracker-local",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53949983",
+    "_collection_link": "https://go.postman.co/collection/53949983-c3d5ee75-5ded-4473-b915-ea34f1817bd4?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "create application",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"company\": \"Wix\",\r\n    \"position\": \"Junior DevOps Engineer\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:5000/applications",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "5000",
+          "path": [
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get all applications",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/applications",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "5000",
+          "path": [
+            "applications"
+          ]
+        },
+        "description": "localhost = 127.0.0.1 - זה DNS פנימי של המחשב. על Windows עדכני זה לפעמים עושה בעיות - עדיף להשתמש ישירות ב-127.0.0.1.\n\nפורט 5000 חייב להיות מפורש - כי ברירת המחדל של HTTP היא 80, ו-Flask רץ על 5000."
+      },
+      "response": []
+    },
+    {
+      "name": "get applications by status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/applications?status=applied",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "5000",
+          "path": [
+            "applications"
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "applied"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get application by id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/applications/69e673dcf70c8f54e58a6a00",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "5000",
+          "path": [
+            "applications",
+            "69e673dcf70c8f54e58a6a00"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete application",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/applications/69e673dcf70c8f54e58a6a00",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "5000",
+          "path": [
+            "applications",
+            "69e673dcf70c8f54e58a6a00"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    }
+  ]
+}
