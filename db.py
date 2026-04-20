@@ -1,3 +1,5 @@
+# db.py - חיבור mongodb
+
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv

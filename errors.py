@@ -1,3 +1,5 @@
+# errors.py - מטפלי שגיאות מאוחדים של json
+
 from flask import Blueprint, jsonify
 from werkzeug.exceptions import NotFound, BadRequest, HTTPException
 

@@ -1,3 +1,5 @@
+# app.py - entry point, connects everything
+
 from flask import Flask, jsonify, render_template
 from db import init_db
 from routes.applications import applications_bp
