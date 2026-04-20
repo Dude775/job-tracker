@@ -49,6 +49,7 @@ def create_application():
         "company": data["company"].strip(),
         "position": data["position"].strip(),
         "status": "applied",
+        "applied_date": data.get("applied_date", ""),
         "source": data.get("source", ""),
         "notes": data.get("notes", ""),
         "events": []
