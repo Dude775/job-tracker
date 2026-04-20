@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from db import init_db
 from routes.applications import applications_bp
 from errors import errors_bp
@@ -9,6 +9,14 @@ init_db(app)
 
 app.register_blueprint(applications_bp)
 app.register_blueprint(errors_bp)
+
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({
+        "app": "Job Tracker API",
+        "endpoints": ["/applications"],
+        "status": "running"
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)
