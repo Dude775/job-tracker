@@ -93,3 +93,30 @@ def delete_application(id):
     if result.deleted_count == 0:
         raise NotFound("not found")
     return jsonify({"message": "deleted successfuly"}), 200
+
+# הוספת event למשרה - הlist הפנימי
+@applications_bp.route('/applications/<id>/events', methods=['POST'])
+def add_event(id):
+    col = get_collection("applications")
+    try:
+        app = col.find_one({"_id": ObjectId(id)})
+    except:
+        raise BadRequest("invalid id")
+    if not app:
+        raise NotFound("application not found")
+    data = request.get_json()
+    if not data or "type" not in data:
+        raise BadRequest("missing event type")
+    event = {
+        "event_id": str(ObjectId()),
+        "type": data["type"],
+        "note": data.get("note", ""),
+        "date": data.get("date", "")
+    }
+    col.update_one(
+        {"_id": ObjectId(id)},
+        {"$push": {"events": event}}
+    )
+    updated = col.find_one({"_id": ObjectId(id)})
+    updated["_id"] = str(updated["_id"])
+    return jsonify(updated), 201
