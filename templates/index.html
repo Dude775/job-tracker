@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Tracker</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+    <div class="container">
+        <h1>Job Tracker</h1>
+
+        <form id="add-form">
+            <input type="text" id="new-company" placeholder="Company name" autocomplete="off" required />
+            <input type="text" id="new-position" placeholder="Position" autocomplete="off" required />
+            <button type="submit">Add</button>
+        </form>
+
+        <ul id="app-list"></ul>
+
+        <p id="empty-msg" class="empty-msg hidden">No applications yet. Add one above!</p>
+        <p id="error-msg" class="error-msg hidden"></p>
+    </div>
+
+    <script>
+        const API = "/applications";
+
+        const appList = document.getElementById("app-list");
+        const emptyMsg = document.getElementById("empty-msg");
+        const errorMsg = document.getElementById("error-msg");
+        const addForm = document.getElementById("add-form");
+        const newCompany = document.getElementById("new-company");
+        const newPosition = document.getElementById("new-position");
+
+        const statusColors = {
+            "applied": "#6366f1",
+            "phone_screen": "#f59e0b",
+            "interview": "#3b82f6",
+            "offer": "#10b981",
+            "rejected": "#ef4444",
+            "accepted": "#059669"
+        };
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.classList.remove("hidden");
+            setTimeout(() => errorMsg.classList.add("hidden"), 4000);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, c => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            }[c]));
+        }
+
+        function renderApps(apps) {
+            appList.innerHTML = "";
+            emptyMsg.classList.toggle("hidden", apps.length > 0);
+
+            apps.forEach(app => {
+                const li = document.createElement("li");
+                li.className = "app-item";
+                li.dataset.id = app._id;
+
+                const color = statusColors[app.status] || "#94a3b8";
+
+                li.innerHTML = `
+                    <div class="app-info">
+                        <span class="company">${escapeHtml(app.company)}</span>
+                        <span class="position">${escapeHtml(app.position)}</span>
+                        <span class="status-badge" style="background:${color}">${app.status}</span>
+                    </div>
+                    <div class="actions">
+                        <select class="status-select">
+                            <option value="">change status</option>
+                            <option value="applied">applied</option>
+                            <option value="phone_screen">phone screen</option>
+                            <option value="interview">interview</option>
+                            <option value="offer">offer</option>
+                            <option value="rejected">rejected</option>
+                            <option value="accepted">accepted</option>
+                        </select>
+                        <button class="btn-delete" title="Delete">&#10005;</button>
+                    </div>
+                `;
+
+                // status change
+                li.querySelector(".status-select").addEventListener("change", (e) => {
+                    if (e.target.value) updateApp(app._id, { status: e.target.value });
+                });
+
+                // delete
+                li.querySelector(".btn-delete").addEventListener("click", () => deleteApp(app._id));
+
+                appList.appendChild(li);
+            });
+        }
+
+        async function loadApps() {
+            try {
+                const res = await fetch(API);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "failed to load");
+                renderApps(data);
+            } catch (e) {
+                showError(e.message);
+            }
+        }
+
+        async function createApp(company, position) {
+            const res = await fetch(API, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ company, position }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "failed to create");
+            return data;
+        }
+
+        async function updateApp(id, fields) {
+            try {
+                const res = await fetch(`${API}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(fields),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "failed to update");
+                loadApps();
+            } catch (e) {
+                showError(e.message);
+            }
+        }
+
+        async function deleteApp(id) {
+            try {
+                const res = await fetch(`${API}/${id}`, { method: "DELETE" });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "failed to delete");
+                loadApps();
+            } catch (e) {
+                showError(e.message);
+            }
+        }
+
+        addForm.addEventListener("submit", async e => {
+            e.preventDefault();
+            const company = newCompany.value.trim();
+            const position = newPosition.value.trim();
+            if (!company || !position) return;
+            try {
+                await createApp(company, position);
+                newCompany.value = "";
+                newPosition.value = "";
+                loadApps();
+            } catch (e) {
+                showError(e.message);
+            }
+        });
+
+        loadApps();
+    </script>
+</body>
+
+</html>
