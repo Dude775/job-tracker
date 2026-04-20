@@ -6,13 +6,20 @@ from db import get_collection
 applications_bp = Blueprint("applications", __name__)
 
 # כל המשרות
+# כל המשרות + פילרטר לפי סטטוס
 @applications_bp.route('/applications', methods=['GET'])
 def get_applications():
     col = get_collection("applications")
-    apps = list(col.find())
+    # אם יש query param של status - מסנן
+    status = request.args.get("status")
+    query = {}
+    if status:
+        query["status"] = status
+    apps = list(col.find(query))
     for a in apps:
         a["_id"] = str(a["_id"])
     return jsonify(apps)
+
 
 # משרה בודדת
 @applications_bp.route('/applications/<id>', methods=['GET'])
