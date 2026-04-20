@@ -144,6 +144,18 @@ All errors return unified JSON:
 ---
 
 ## Tech Stack
+---
+
+## Screenshots
+
+### Before CSS
+![no style](screenshots/no_style_yet.png)
+
+### With Styling
+![with style](screenshots/with_styling.png)
+
+### MongoDB Compass
+![mongodb](screenshots/mongodb_compass.png)
 
 - **Python 3** + **Flask**
 - **MongoDB Atlas** (PyMongo)
